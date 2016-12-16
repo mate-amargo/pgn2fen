@@ -21,9 +21,9 @@
 
 int main (int argc, char **argv) {
 
-	int move, i;
-	char side = 'w';
-	FILE 	*finput, *foutput;
+	int move /* move number argument */;
+	char side = 'w'; /* Default side is white */
+	FILE 	*finput, *foutput = NULL;
 
 	/* Check the program arguments */
 	if ((argc-1 >= NARGS) && (argc-1 <= NARGS + NARGSOPT)) {
@@ -85,6 +85,45 @@ int main (int argc, char **argv) {
 	}
 	/* Everything is ok, now let's work: */
 	
+	if (foutput == NULL) /* They didn't specify an output file so write to stdout */
+		foutput = stdout;
+	
+	char line[128];	/* Buffer to hold lines */
+	/* Read past all tag pairs and ignore them */
+	/* Note that this is also skips the first blank line, which we also want :) */
+	while(fgets(line, sizeof line, finput) != NULL) {
+		if (line[0] != '[') break;
+	}
+
+	/* List to hold the moves */
+	struct tlist {
+		char move[8]; /* Max length is 6, e.g. Nbxf3+, O-O-O+ */
+		struct tlist *next;
+	};
+
+	struct tlist *list, *x, *y; /* List head pointed by "list", "x" & "y" are auxiliary */
+	list = malloc(sizeof(struct tlist)); /* Create an empty list member to make life easier */
+	list->next = NULL;
+	x = list;
+
+	int pgnmove = 1; /* "pgnmove" is the move number (ply) in the pgn file. "move" is the argument. */
+	int blackmove = 0; /* If we want the position after black moved, we have to go one more loop iteration */
+	if ('b' == side)
+		blackmove = 1;
+
+	while (!feof(finput) && ((pgnmove+blackmove)/2 < move + blackmove)) {
+		/* Add a new move to the list */
+		y = malloc(sizeof(struct tlist));
+		y->next = NULL;
+		fscanf(finput, "%*d%*[. ]");
+		fscanf(finput, "%s", y->move);
+		x->next = y;
+		x = y;
+		pgnmove++;
+	}
+
+	x = list;
+	while (x) { printf("%s ", x->move); x = x->next; } printf("\n");
 
 	exit(EXIT_SUCCESS);
 
