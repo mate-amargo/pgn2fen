@@ -1,7 +1,7 @@
 # pgn2fen
 Extracts FEN of a specific move on a PGN game
 
-ABOUT FEN
+About FEN
 =========
 
 Forsyth–Edwards Notation (FEN) is a standard notation for describing a particular board position of a chess game. The purpose of FEN is to provide all the necessary information to restart a game from a particular position.
