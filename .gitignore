@@ -1,2 +1,3 @@
 # Ignore PGN files for testing
 *.pgn
+pgn2fen
