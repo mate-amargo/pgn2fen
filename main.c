@@ -94,6 +94,8 @@ int main (int argc, char **argv) {
 	while(fgets(line, sizeof line, finput) != NULL) {
 		if (line[0] != '[') break;
 	}
+	if ('1' == line[0]) /* The file didn't contain tags */
+		rewind(finput);
 
 	/* List to hold the moves */
 	struct tlist {
@@ -111,6 +113,7 @@ int main (int argc, char **argv) {
 	if ('b' == side)
 		blackmove = 1;
 
+	/* Load the moves into the linked list */
 	while (!feof(finput) && ((pgnmove+blackmove)/2 < move + blackmove)) {
 		/* Add a new move to the list */
 		y = malloc(sizeof(struct tlist));
@@ -120,6 +123,11 @@ int main (int argc, char **argv) {
 		x->next = y;
 		x = y;
 		pgnmove++;
+	}
+
+	if(feof(finput)) {
+		printf("*** Error: Move number %d by %s does not exist\n", move, (side == 'w')?"white":"black");
+		exit(EXIT_FAILURE);
 	}
 
 	x = list;
