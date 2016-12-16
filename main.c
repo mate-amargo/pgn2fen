@@ -34,7 +34,7 @@ int main (int argc, char **argv) {
 			fclose(finput);
 			printf("*** Error: Invalid move number \"%s\"\n", argv[2]);
 			exit(EXIT_FAILURE);
-		} else { /* Optional arguments */
+		} else if (argc-1 > NARGS) { /* Optional arguments */
 			if (3 == argc-1) {
 				if (strlen(argv[3]) == 1) {
 					side = tolower(argv[3][0]);
