@@ -88,14 +88,17 @@ int main (int argc, char **argv) {
 	if (foutput == NULL) /* They didn't specify an output file so write to stdout */
 		foutput = stdout;
 	
-	char line[128];	/* Buffer to hold lines */
+	char line[1024];	/* Buffer to hold lines */
 	/* Read past all tag pairs and ignore them */
-	/* Note that this is also skips the first blank line, which we also want :) */
-	while(fgets(line, sizeof line, finput) != NULL) {
+	while (fgets(line, sizeof line, finput) != NULL) {
 		if (line[0] != '[') break;
 	}
-	if ('1' == line[0]) /* The file didn't contain tags */
-		rewind(finput);
+	/* Now we are past the first line that doesn't have tags */
+	/* The problem comes with empty lines. 
+	 * The next scanf expects to find a number, so if we arrived
+	 * at a line with moves, we need to rewind it, so we can read it with the next scanf.
+   */
+	if (line[0] == '1') fseek(finput, -strlen(line), SEEK_CUR);
 
 	/* List to hold the moves */
 	struct tlist {
