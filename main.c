@@ -88,21 +88,9 @@ int main (int argc, char **argv) {
 	if (foutput == NULL) /* They didn't specify an output file so write to stdout */
 		foutput = stdout;
 	
-	char line[1024];	/* Buffer to hold lines */
-	/* Read past all tag pairs and ignore them */
-	while (fgets(line, sizeof line, finput) != NULL) {
-		if (line[0] != '[') break;
-	}
-	/* Now we are past the first line that doesn't have tags */
-	/* The problem comes with empty lines. 
-	 * The next scanf expects to find a number, so if we arrived
-	 * at a line with moves, we need to rewind it, so we can read it with the next scanf.
-   */
-	if (line[0] == '1') fseek(finput, -strlen(line), SEEK_CUR);
-
 	/* List to hold the moves */
 	struct tlist {
-		char move[8]; /* Max length is 6, e.g. Nbxf3+, O-O-O+ */
+		char move[8]; /* Max length is 6, e.g. Nbxf3+, O-O-O+; 5 if we don't count checks/mates */
 		struct tlist *next;
 	};
 
@@ -111,21 +99,77 @@ int main (int argc, char **argv) {
 	list->next = NULL;
 	x = list;
 
-	int pgnmove = 1; /* "pgnmove" is the move number (ply) in the pgn file. "move" is the argument. */
+	int i; /* Why didn't we have one of these before?? */
+	char c, d;	/* Buffers to hold chars */
+	int breakout = 0, breakout2 = 0; /* flags to breakout of while loops from within switch statements */
+	int ply = 1; /* "ply" is the half-move number in the pgn file. "move" is the argument. */
 	int blackmove = 0; /* If we want the position after black moved, we have to go one more loop iteration */
 	if ('b' == side)
 		blackmove = 1;
-
 	/* Load the moves into the linked list */
-	while (!feof(finput) && ((pgnmove+blackmove)/2 < move + blackmove)) {
-		/* Add a new move to the list */
+	while (!feof(finput) && ((ply+blackmove)/2 < move + blackmove)) {
+		/* Add a new item to the list */
 		y = malloc(sizeof(struct tlist));
 		y->next = NULL;
-		fscanf(finput, "%*d%*[. ]");
-		fscanf(finput, "%s", y->move);
+
+		i = 0; /* Set's the position of the move array (of chars) to 0 */
+		breakout = 0;
+		while (!breakout && (c = fgetc(finput)) != EOF) {
+			switch (c) {
+				case '[': /* It's a tag, read past it */
+					while (fgetc(finput) != '\n');
+					break;
+				case '(': /* Variation, read past it, after the space */
+					while (fgetc(finput) != ')');
+					fgetc(finput); /* Discard space */
+					break;
+				case '{': /* Commentary, read past it, after the space */
+					while (fgetc(finput) != '}');
+					fgetc(finput); /* Discard space */
+					break;
+				case '1':	case '2':	case '3':	case '4':	case '5':	case '6':	case '7':	case '8': case '9':
+					breakout2 = 0;
+					/* Distinguish between move numbers and things like e4xd5 */
+					d = c; /* Keep the old number in hand */
+					while (!breakout2 && (c = fgetc(finput)) != EOF) { /* If it's a number keep eating chars */
+						switch (c) {
+							case '.': /* It's the beginning of a move, so eat the space */
+								fgetc(finput);
+								breakout2 = 1;
+								break;
+							/* It's not a number, so store the first number and the following char, and break out the loop */
+							case 'a':	case 'b':	case 'c':	case 'd':	case 'e':	case 'f':	case 'g':	case 'h':
+							case 'R':	case 'N':	case 'B': case 'Q': case 'K':
+							case 'x': case 'O': case '-':
+								y->move[i++] = d;
+								y->move[i++] = c;
+								breakout = breakout2 = 1;
+								break;
+							case ' ': /* It's the ending of a move with number like e4 */
+								y->move[i++] = d;
+								breakout = breakout2 = 1;
+								break;
+						}
+					}
+					if (feof(finput)) { /* We reached EOF while saving the last move! */
+						y->move[i++] = d; 
+						breakout = 1; 
+						clearerr(finput); /* Clear the EOF flag */
+					}
+					break;
+				case 'a':	case 'b':	case 'c':	case 'd':	case 'e':	case 'f':	case 'g':	case 'h':
+				case 'R':	case 'N':	case 'B': case 'Q': case 'K':
+				case 'x': case 'O': case '-':
+					y->move[i++] = c;
+					break;
+				case ' ': /* Finish reading the move. Break out of the loop in a cheaty way! */
+					breakout = 1;
+					break;
+			}
+		} 
 		x->next = y;
 		x = y;
-		pgnmove++;
+		ply++;
 	}
 
 	if(feof(finput)) {
