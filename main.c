@@ -143,7 +143,7 @@ int main (int argc, char **argv) {
 							case 'x': case 'O': case '-':
 								y->move[i++] = d;
 								y->move[i++] = c;
-								breakout = breakout2 = 1;
+								breakout2 = 1;
 								break;
 							case ' ': /* It's the ending of a move with number like e4 */
 								y->move[i++] = d;
@@ -162,11 +162,12 @@ int main (int argc, char **argv) {
 				case 'x': case 'O': case '-':
 					y->move[i++] = c;
 					break;
-				case ' ': /* Finish reading the move. Break out of the loop in a cheaty way! */
+				case ' ': /* Finish reading the move. Break out of the loop */
 					breakout = 1;
 					break;
 			}
-		} 
+		}
+
 		x->next = y;
 		x = y;
 		ply++;
