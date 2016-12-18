@@ -229,6 +229,7 @@ int main (int argc, char **argv) {
 							board[RANKS - (x->move[3] - '0') + 1][x->move[2] - 'a'] = '1';
 						else
 							board[RANKS - (x->move[3] - '0') - 1][x->move[2] - 'a'] = '1';
+						enpassant = 0;
 					}
 					/* Set destination square */
 					/* Parenthesis are important, otherwise because RANKS is an int, the chars will get promoted and we'll get a wrong result */
