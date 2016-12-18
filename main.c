@@ -210,6 +210,7 @@ int main (int argc, char **argv) {
 
 	char castling = 17; /* Third field of the FEN: KQkq, each letter represents a bit, thus 17 is all castling allowed */
 	int turn = WHITE;
+	int enpassant = 0;
 
 	x = list->next; /* Skip the empty item */
 	while (x) {
@@ -218,18 +219,34 @@ int main (int argc, char **argv) {
 		switch (x->move[0]) {
 			case 'a':	case 'b':	case 'c':	case 'd':	case 'e':	case 'f':	case 'g':	case 'h': /* Pawn move */
 				if (strlen(x->move) > 2) { /* Move with capture */
-					
+					/* Set origin square */
+					if (turn)
+						board[RANKS - (x->move[3] - '0') + 1][x->move[0] - 'a'] = '1';
+					else
+						board[RANKS - (x->move[3] - '0') - 1][x->move[0] - 'a'] = '1';
+					if (enpassant) { /* Clear the passed pawn */
+						if (turn)
+							board[RANKS - (x->move[3] - '0') + 1][x->move[2] - 'a'] = '1';
+						else
+							board[RANKS - (x->move[3] - '0') - 1][x->move[2] - 'a'] = '1';
+					}
+					/* Set destination square */
 					/* Parenthesis are important, otherwise because RANKS is an int, the chars will get promoted and we'll get a wrong result */
-					board[RANKS - (x->move[2] - '0')][x->move[1] - 'a'] = (turn)?'P':'p';
+					board[RANKS - (x->move[3] - '0')][x->move[2] - 'a'] = (turn)?'P':'p';
 				} else {
-					if (turn && '4' == x->move[1] && board[6][x->move[0] - 'a'] == 'P') /* The pawn could've came from white's first move */
+					enpassant = 0;
+					/* Set origin square */
+					if (turn && '4' == x->move[1] && board[6][x->move[0] - 'a'] == 'P') { /* The pawn could've came from white's first move */
 						board[6][x->move[0] - 'a'] = '1';
-					else if (!turn && '5' == x->move[1] && board[1][x->move[0] - 'a'] == 'p') /* The pawn could've came from black's first move */
+						enpassant = 1;
+					}	else if (!turn && '5' == x->move[1] && board[1][x->move[0] - 'a'] == 'p') { /* The pawn could've came from black's first move */
 						board[1][x->move[0] - 'a'] = '1';
-					else if (turn) /* White pawn push */
+						enpassant = 1;
+					} else if (turn) /* White pawn push */
 						board[RANKS - (x->move[1] - '0') + 1][x->move[0] - 'a'] = '1';
 					else /* Black pawn push */
 						board[RANKS - (x->move[1] - '0') - 1][x->move[0] - 'a'] = '1';
+					/* Set destination square */
 					board[RANKS - (x->move[1] - '0')][x->move[0] - 'a'] = (turn)?'P':'p';
 				}
 				break;
