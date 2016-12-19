@@ -96,7 +96,7 @@ int main (int argc, char **argv) {
 	
 	/* List to hold the moves */
 	struct tlist {
-		char move[8]; /* Max length is 6, e.g. Nbxf3+, O-O-O+; 5 if we don't count checks/mates */
+		char move[8]; /* Max length if we don't count checks/mates is 6, e.g. exd8=Q, Nd7xe5 */
 		struct tlist *next;
 	};
 
@@ -146,12 +146,12 @@ int main (int argc, char **argv) {
 							/* It's not a number, so store the first number and the following char, and break out the loop */
 							case 'a':	case 'b':	case 'c':	case 'd':	case 'e':	case 'f':	case 'g':	case 'h':
 							case 'R':	case 'N':	case 'B': case 'Q': case 'K':
-							case 'x': case 'O': case '-':
+							case 'x': case 'O': case '-':	case '=':
 								y->move[i++] = d;
 								y->move[i++] = c;
 								breakout2 = 1;
 								break;
-							case ' ': /* It's the ending of a move with number like e4 */
+							case ' ':	case '\n': /* It's the ending of a move with number like e4 */
 								y->move[i++] = d;
 								breakout = breakout2 = 1;
 								break;
@@ -165,15 +165,18 @@ int main (int argc, char **argv) {
 					break;
 				case 'a':	case 'b':	case 'c':	case 'd':	case 'e':	case 'f':	case 'g':	case 'h':
 				case 'R':	case 'N':	case 'B': case 'Q': case 'K':
-				case 'x': case 'O': case '-':
+				case 'x': case 'O': case '-':	case '=':
 					y->move[i++] = c;
 					break;
-				case ' ': /* Finish reading the move. Break out of the loop */
+				case ' ': case '\n': /* Finish reading the move. Break out of the loop */
+					if (feof(finput)) /* We reached EOF while saving the last move! */
+						clearerr(finput); /* Clear the EOF flag */
 					breakout = 1;
 					break;
 			}
 		}
 
+//		printf("\"%s\"\n", y->move);	
 		x->next = y;
 		x = y;
 		ply++;
@@ -215,11 +218,21 @@ int main (int argc, char **argv) {
 
 	x = list->next; /* Skip the empty item */
 	while (x) {
-	//	for (i = 0; x->move[i] != '\0'; i++)
-//								printf("\"%s\"\n", x->move);	
 		switch (x->move[0]) {
 			case 'a':	case 'b':	case 'c':	case 'd':	case 'e':	case 'f':	case 'g':	case 'h': /* Pawn move */
-				if (strlen(x->move) > 2) { /* Move with capture */
+				if (strstr(x->move,"=")) { /* Pawn promotion */
+					/* Set origin square */
+					if (turn) /* White */
+						board[1][x->move[0] - 'a'] = '1';
+					else /* Black */
+						board[RANKS-2][x->move[0] - 'a'] = '1';
+					/* Set destination square */
+					for (i = 0; x->move[i] != '='; i++); /* i is now the position of "=" */
+					if (turn) /* White */
+						board[0][x->move[i-2] - 'a'] = x->move[i+1];
+					else /* Black */
+						board[RANKS][x->move[i-2] - 'a'] = x->move[i+1];
+				} else if (strlen(x->move) > 2) { /* Move with capture */
 					/* Set origin square */
 					if (turn)
 						board[RANKS - (x->move[3] - '0') + 1][x->move[0] - 'a'] = '1';
