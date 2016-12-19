@@ -211,6 +211,7 @@ int main (int argc, char **argv) {
 	char castling = 17; /* Third field of the FEN: KQkq, each letter represents a bit, thus 17 is all castling allowed */
 	int turn = WHITE;
 	int enpassant = 0;
+	int found = 0;
 
 	x = list->next; /* Skip the empty item */
 	while (x) {
@@ -251,7 +252,83 @@ int main (int argc, char **argv) {
 					board[RANKS - (x->move[1] - '0')][x->move[0] - 'a'] = (turn)?'P':'p';
 				}
 				break;
-			case 'R':	case 'N':	case 'B': case 'Q': case 'K':
+			case 'R':
+				c = (turn)?'R':'r'; /* Set piece. Altough it would be clearer to define a new var "piece", I prefer to be confusing and reuse vars */
+				/* Remove "x" if any */
+				for (i = 0; x->move[i] != '\0'; i++)
+					if (x->move[i] == 'x') {
+						for (j = i; x->move[j] != '\0'; j++)
+							x->move[j] = x->move[j+1];
+						break;
+					}
+				if (4 == strlen(x->move)) { /* Disambiguate move */
+					/* Set origin square */
+					if (x->move[1] > '8') { /* It's a letter, i.e. a file, then simply the origin file is given to us */
+						for (found = 0, i = RANKS - (x->move[3] - '0') + 1; i < RANKS; i++) /* Look down on the file */
+							if (board[i][x->move[1] - 'a'] == c) {
+								board[i][x->move[1] - 'a'] = '1';
+								found = 1;
+								break;
+							} else if (board[i][x->move[1] - 'a'] != '1') /* We hit a piece */
+								break;
+						for (i = RANKS - (x->move[3] - '0') - 1; !found && i >= 0; i--) /* Look up on the file */
+							if (board[i][x->move[1] - 'a'] == c) {
+								board[i][x->move[1] - 'a'] = '1';
+								break;
+							} else if (board[i][x->move[1] - 'a'] != '1') /* We hit a piece */
+								break;
+					}	else { /* It's a number, i.e. the origin rank is given to us */
+						board[RANKS - (x->move[1] - '0')][x->move[2] - 'a'] = '1';
+						for (found = 0, i = (x->move[2] - 'a') + 1; i < FILES; i++) /* Look to the right on the rank */
+							if (board[RANKS - (x->move[1] - '0')][i] == c) {
+								board[RANKS - (x->move[1] - '0')][i] = '1';
+								found = 1;
+								break;
+							} else if (board[RANKS - (x->move[1] - '0')][i] != '1') /* We hit a piece */
+								break;
+						for (i = (x->move[2] - 'a') - 1; !found && i >= 0; i--) /* Look to the left on the rank */
+							if (board[RANKS - (x->move[1] - '0')][i] == c) {
+								board[RANKS - (x->move[1] - '0')][i] = '1';
+								break;
+							} else if (board[RANKS - (x->move[1] - '0')][i] != '1') /* We hit a piece */
+								break;
+					}
+					/* To set the destination square cut the extra letter */
+					x->move[1] = x->move[2]; x->move[2] = x->move[3]; x->move[3] = '\0';
+				} else { /* Unambigous move */
+					/* Set origin square */
+					for (found = 0, i = RANKS - (x->move[2] - '0') + 1; i < RANKS; i++) /* Look down on the file */
+						if (board[i][x->move[1] - 'a'] == c) {
+							board[i][x->move[1] - 'a'] = '1';
+							found = 1;
+							break;
+						} else if (board[i][x->move[1] - 'a'] != '1') /* We hit a piece */
+							break;
+					for (i = RANKS - (x->move[2] - '0') - 1; !found && i >= 0; i--) /* Look up on the file */
+						if (board[i][x->move[1] - 'a'] == c) {
+							board[i][x->move[1] - 'a'] = '1';
+							found = 1;
+							break;
+						} else if (board[i][x->move[1] - 'a'] != '1') /* We hit a piece */
+							break;
+					for (i = (x->move[1] - 'a') + 1; !found && i < FILES; i++) /* Look to the right on the rank */
+						if (board[RANKS - (x->move[2] - '0')][i] == c) {
+							board[RANKS - (x->move[2] - '0')][i] = '1';
+							found = 1;
+							break;
+						} else if (board[RANKS - (x->move[2] - '0')][i] != '1') /* We hit a piece */
+							break;
+					for (i = (x->move[1] - 'a') - 1; !found && i >= 0; i--) /* Look to the left on the rank */
+						if (board[RANKS - (x->move[2] - '0')][i] == c) {
+							board[RANKS - (x->move[2] - '0')][i] = '1';
+							break;
+						} else if (board[RANKS - (x->move[2] - '0')][i] != '1') /* We hit a piece */
+							break;
+				}
+				/* Set destination square */
+				board[RANKS - (x->move[2] - '0')][x->move[1] - 'a'] = c;
+				break;
+			case 'N':	case 'B': case 'Q': case 'K':
 			case 'O':
 				break;
 		}
