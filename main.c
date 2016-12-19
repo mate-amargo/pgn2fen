@@ -239,9 +239,11 @@ int main (int argc, char **argv) {
 					else
 						board[RANKS - (x->move[3] - '0') - 1][x->move[0] - 'a'] = '1';
 					if (enpassant) { /* Clear the passed pawn */
-						if (turn)
+						/* We need the origin, so we add (black) or subtract (white) 1 from the destination */
+						/* In this case we don't need to translate the position to the matrix rank */
+						if (turn && (x->move[3] - '0') - 1 == 5) /* If the capturing pawn is white it must be on rank 5 */
 							board[RANKS - (x->move[3] - '0') + 1][x->move[2] - 'a'] = '1';
-						else
+						else if ((x->move[3] - '0') + 1 == 4) /* If the capturing pawn is black it must be on rank 4 */
 							board[RANKS - (x->move[3] - '0') - 1][x->move[2] - 'a'] = '1';
 						enpassant = 0;
 					}
