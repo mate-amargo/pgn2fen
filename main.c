@@ -267,7 +267,7 @@ int main (int argc, char **argv) {
 					board[RANKS - (x->move[1] - '0')][x->move[0] - 'a'] = (turn)?'P':'p';
 				}
 				break;
-			case 'R':
+			case 'R': /* Rook move */
 				c = (turn)?'R':'r'; /* Set piece. Altough it would be clearer to define a new var "piece", I prefer to be confusing and reuse vars */
 				/* Remove "x" if any */
 				for (i = 0; x->move[i] != '\0'; i++)
@@ -344,7 +344,31 @@ int main (int argc, char **argv) {
 				board[RANKS - (x->move[2] - '0')][x->move[1] - 'a'] = c;
 				break;
 			case 'N':	case 'B': case 'Q': case 'K':
-			case 'O':
+			case 'O': /* Castling */
+				if (strlen(x->move) == 3) /* O-O */
+					if (turn) { /* I could do smth crazy to save the if, like board[7*(1-turn)][]. But 1 "if" is faster than 4 multiplications, is it? */
+						board[0][4] = '1';
+						board[0][5] = 'R';
+						board[0][6] = 'K';
+						board[0][7] = '1';
+					} else {
+						board[7][4] = '1';
+						board[7][5] = 'r';
+						board[7][6] = 'k';
+						board[7][7] = '1';
+					}
+				else /* strlen(x->move) == 5; O-O-O */ 
+					if (turn) {
+						board[0][0] = '1';
+						board[0][2] = 'K';
+						board[0][3] = 'R';
+						board[0][4] = '1';
+					} else {
+						board[7][0] = '1';
+						board[7][2] = 'k';
+						board[7][3] = 'r';
+						board[7][4] = '1';
+					}
 				break;
 		}
 		x = x->next;
