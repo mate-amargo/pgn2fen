@@ -231,7 +231,7 @@ int main (int argc, char **argv) {
 					if (turn) /* White */
 						board[0][x->move[i-2] - 'a'] = x->move[i+1];
 					else /* Black */
-						board[RANKS][x->move[i-2] - 'a'] = x->move[i+1];
+						board[RANKS-1][x->move[i-2] - 'a'] = tolower(x->move[i+1]); /* Promotions are uppercase */
 				} else if (strlen(x->move) > 2) { /* Move with capture */
 					/* Set origin square */
 					if (turn)
@@ -343,7 +343,104 @@ int main (int argc, char **argv) {
 				/* Set destination square */
 				board[RANKS - (x->move[2] - '0')][x->move[1] - 'a'] = c;
 				break;
-			case 'N':	case 'B': case 'Q': case 'K':
+			case 'N': /* Knight move */
+				break;
+			case 'B': /* Bishop move */
+				/* In the ridiculous case that they promote to bishop, we'll have to disambiguate.*/ 
+				/* In the more ridiculous case that there's at least 3 same coloured bishops, we'll have rank and file, e.g. Bg8xd5 */
+				c = (turn)?'B':'b';
+				/* Remove "x" if any */
+				for (i = 0; x->move[i] != '\0'; i++)
+					if (x->move[i] == 'x') {
+						for (j = i; x->move[j] != '\0'; j++)
+							x->move[j] = x->move[j+1];
+						break;
+					}
+				if (strlen(x->move) == 3) {
+					/* Set origin square */
+					for (found = 0, i = 1; i <= RANKS - (x->move[2] - '0') && i <= (x->move[1] - 'a'); i++) /* Upper part  \ */
+						if (board[RANKS - (x->move[2] -'0') - i][(x->move[1] - 'a') - i] == c) {
+							board[RANKS - (x->move[2] -'0') - i][(x->move[1] - 'a') - i] = '1';
+							found = 1;
+							break;
+						} else if	(board[RANKS - (x->move[2] -'0') - i][(x->move[1] - 'a') - i] != '1') /* We hit a piece */
+								break;
+					for (i = 1; !found && i <= RANKS - (x->move[2] - '0') && i <= FILES - (x->move[1] - 'a'); i++) /* Upper part / */
+						if (board[RANKS - (x->move[2] -'0') - i][(x->move[1] - 'a') + i] == c) {
+							board[RANKS - (x->move[2] -'0') - i][(x->move[1] - 'a') + i] = '1';
+							found = 1;
+							break;
+						} else if	(board[RANKS - (x->move[2] -'0') - i][(x->move[1] - 'a') + i] != '1') /* We hit a piece */
+								break;
+					for (i = 1; !found && i <= (x->move[2] - '0') && i <= (x->move[1] - 'a'); i++) /* Lower part \ */
+						if (board[RANKS - (x->move[2] -'0') + i][(x->move[1] - 'a') - i] == c) {
+							board[RANKS - (x->move[2] -'0') + i][(x->move[1] - 'a') - i] = '1';
+							found = 1;
+							break;
+						} else if	(board[RANKS - (x->move[2] -'0') + i][(x->move[1] - 'a') - i] != '1') /* We hit a piece */
+								break;
+					for (i = 1; !found && i <= (x->move[2] - '0') && i <= FILES - (x->move[1] - 'a'); i++) /* Lower part / */
+						if (board[RANKS - (x->move[2] -'0') + i][(x->move[1] - 'a') + i] == c) {
+							board[RANKS - (x->move[2] -'0') + i][(x->move[1] - 'a') + i] = '1';
+							found = 1;
+							break;
+						} else if	(board[RANKS - (x->move[2] -'0') + i][(x->move[1] - 'a') + i] != '1') /* We hit a piece */
+								break;
+					/* Set destination square */
+					board[RANKS - (x->move[2] - '0')][x->move[1] - 'a'] = c;
+				} else if (strlen(x->move) == 4) {
+					/* Set origin square */
+					if (x->move[1] > '8') { /* It's a letter, the origin file is given to us. Bbe4 */
+						for (found = 0, i = 1; i <= RANKS - (x->move[3] - '0') && i <= (x->move[2] - 'a'); i++) /* Upper part  \ */
+							if ((x->move[2] - 'a') - i != (x->move[1] - 'a'))
+								continue;
+							else if (board[RANKS - (x->move[3] -'0') - i][(x->move[2] - 'a') - i] == c) {
+								board[RANKS - (x->move[3] -'0') - i][(x->move[2] - 'a') - i] = '1';
+								found = 1;
+								break;
+							} else if	(board[RANKS - (x->move[3] -'0') - i][(x->move[2] - 'a') - i] != '1') /* We hit a piece */
+									break;
+						for (i = 1; !found && i <= RANKS - (x->move[3] - '0') && i <= (x->move[2] - 'a'); i++) /* Upper part  / */
+							if ((x->move[2] - 'a') + i != (x->move[1] - 'a'))
+								continue;
+							else if (board[RANKS - (x->move[3] -'0') - i][(x->move[2] - 'a') + i] == c) {
+								board[RANKS - (x->move[3] -'0') - i][(x->move[2] - 'a') + i] = '1';
+								found = 1;
+								break;
+							} else if	(board[RANKS - (x->move[3] -'0') - i][(x->move[2] - 'a') + i] != '1') /* We hit a piece */
+									break;
+						for (i = 1; !found && i <= RANKS - (x->move[3] - '0') && i <= (x->move[2] - 'a'); i++) /* Lower part  \ */
+							if ((x->move[2] - 'a') - i != (x->move[1] - 'a'))
+								continue;
+							else if (board[RANKS - (x->move[3] -'0') + i][(x->move[2] - 'a') - i] == c) {
+								board[RANKS - (x->move[3] -'0') + i][(x->move[2] - 'a') - i] = '1';
+								found = 1;
+								break;
+							} else if	(board[RANKS - (x->move[3] -'0') + i][(x->move[2] - 'a') - i] != '1') /* We hit a piece */
+									break;
+						for (i = 1; !found && i <= RANKS - (x->move[3] - '0') && i <= (x->move[2] - 'a'); i++) /* Lower part  / */
+							if ((x->move[2] - 'a') + i != (x->move[1] - 'a'))
+								continue;
+							else if (board[RANKS - (x->move[3] -'0') + i][(x->move[2] - 'a') + i] == c) {
+								board[RANKS - (x->move[3] -'0') + i][(x->move[2] - 'a') + i] = '1';
+								found = 1;
+								break;
+							} else if	(board[RANKS - (x->move[3] -'0') + i][(x->move[2] - 'a') + i] != '1') /* We hit a piece */
+									break;
+					}
+					/* Set destination square */
+					board[RANKS - (x->move[3] - '0')][x->move[2] - 'a'] = c;
+				} else { /* strlen(x->move) == 5, e.g. Bf5g4*/
+					/* Set origin square */
+					board[RANKS - (x->move[2] - '0')][x->move[1] - 'a'] = '1';
+					/* Set destination square */
+					board[RANKS - (x->move[4] - '0')][x->move[3] - 'a'] = c;
+				}
+				break;
+			case 'Q': /* Queen move */
+				break;
+			case 'K': /* King move */
+				break;
 			case 'O': /* Castling */
 				if (strlen(x->move) == 3) /* O-O */
 					if (turn) { /* I could do smth crazy to save the if, like board[7*(1-turn)][]. But 1 "if" is faster than 4 multiplications, is it? */
