@@ -14,16 +14,16 @@
 #include <string.h>
 #include <ctype.h>
 
-#define NARGS 2			/* Mandatory arguments */
-#define NARGSOPT 2	/* Optional arguments */
-#define FILES 8			/* Board files (columns) (a-h) */
-#define RANKS 8			/* Board ranks (rows) (1-8) */
-#define K (1 << 3)	/* White can castle Kingside */
-#define Q (1 << 2)	/* White can castle Queenside */
-#define k (1 << 1)	/* Black can castle Kingside */
-#define q 1 				/* Black can castle Queenside */
-#define WHITE 1			/* Used to determine which turn... */
-#define BLACK 0			/* ...is whilst traversing the list of moves */
+#define NARGS 2						/* Mandatory arguments */
+#define NARGSOPT 2				/* Optional arguments */
+#define FILES 8						/* Board files (columns) (a-h) */
+#define RANKS 8						/* Board ranks (rows) (1-8) */
+#define CASTLEK (1 << 3)	/* White can castle Kingside */
+#define CASTLEQ (1 << 2)	/* White can castle Queenside */
+#define CASTLEk (1 << 1)	/* Black can castle Kingside */
+#define CASTLEq 1 				/* Black can castle Queenside */
+#define WHITE 1						/* Used to determine which turn... */
+#define BLACK 0						/* ...is whilst traversing the list of moves */
 
 int main (int argc, char **argv) {
 
@@ -214,9 +214,11 @@ int main (int argc, char **argv) {
 		/*        a    b    c    d    e    f    g    h        */	
 	};
 
-	char castling = 17; /* Third field of the FEN: KQkq, each letter represents a bit, thus 17 is all castling allowed */
+	char castling = CASTLEK | CASTLEQ | CASTLEk | CASTLEq; /* Third field of the FEN: KQkq, each letter represents a bit */
 	int turn = WHITE;
 	int enpassant = 0;
+	char target[2]; /* Enpassant traget square */
+	char rook[2]; /* Rook origin for castling tests */
 	int found = 0;
 
 	x = list->next; /* Skip the empty item */
@@ -285,6 +287,8 @@ int main (int argc, char **argv) {
 						for (found = 0, i = RANKS - (x->move[3] - '0') + 1; i < RANKS; i++) /* Look down on the file */
 							if (board[i][x->move[1] - 'a'] == c) {
 								board[i][x->move[1] - 'a'] = '1';
+								rook[0] = x->move[1]; 
+								sprintf(&rook[1],"%d", RANKS - i); 
 								found = 1;
 								break;
 							} else if (board[i][x->move[1] - 'a'] != '1') /* We hit a piece */
@@ -292,6 +296,8 @@ int main (int argc, char **argv) {
 						for (i = RANKS - (x->move[3] - '0') - 1; !found && i >= 0; i--) /* Look up on the file */
 							if (board[i][x->move[1] - 'a'] == c) {
 								board[i][x->move[1] - 'a'] = '1';
+								rook[0] = x->move[1]; 
+								sprintf(&rook[1],"%d", RANKS - i); 
 								break;
 							} else if (board[i][x->move[1] - 'a'] != '1') /* We hit a piece */
 								break;
@@ -300,6 +306,8 @@ int main (int argc, char **argv) {
 						for (found = 0, i = (x->move[2] - 'a') + 1; i < FILES; i++) /* Look to the right on the rank */
 							if (board[RANKS - (x->move[1] - '0')][i] == c) {
 								board[RANKS - (x->move[1] - '0')][i] = '1';
+								rook[0] = 'a' + i; 
+								rook[1] = x->move[1]; 
 								found = 1;
 								break;
 							} else if (board[RANKS - (x->move[1] - '0')][i] != '1') /* We hit a piece */
@@ -307,6 +315,8 @@ int main (int argc, char **argv) {
 						for (i = (x->move[2] - 'a') - 1; !found && i >= 0; i--) /* Look to the left on the rank */
 							if (board[RANKS - (x->move[1] - '0')][i] == c) {
 								board[RANKS - (x->move[1] - '0')][i] = '1';
+								rook[0] = 'a' + i; 
+								rook[1] = x->move[1]; 
 								break;
 							} else if (board[RANKS - (x->move[1] - '0')][i] != '1') /* We hit a piece */
 								break;
@@ -318,6 +328,8 @@ int main (int argc, char **argv) {
 					for (found = 0, i = RANKS - (x->move[2] - '0') + 1; i < RANKS; i++) /* Look down on the file */
 						if (board[i][x->move[1] - 'a'] == c) {
 							board[i][x->move[1] - 'a'] = '1';
+							rook[0] = x->move[1]; 
+							sprintf(&rook[1],"%d", RANKS - i); 
 							found = 1;
 							break;
 						} else if (board[i][x->move[1] - 'a'] != '1') /* We hit a piece */
@@ -325,6 +337,8 @@ int main (int argc, char **argv) {
 					for (i = RANKS - (x->move[2] - '0') - 1; !found && i >= 0; i--) /* Look up on the file */
 						if (board[i][x->move[1] - 'a'] == c) {
 							board[i][x->move[1] - 'a'] = '1';
+							rook[0] = x->move[1]; 
+							sprintf(&rook[1],"%d", RANKS - i); 
 							found = 1;
 							break;
 						} else if (board[i][x->move[1] - 'a'] != '1') /* We hit a piece */
@@ -332,6 +346,8 @@ int main (int argc, char **argv) {
 					for (i = (x->move[1] - 'a') + 1; !found && i < FILES; i++) /* Look to the right on the rank */
 						if (board[RANKS - (x->move[2] - '0')][i] == c) {
 							board[RANKS - (x->move[2] - '0')][i] = '1';
+							rook[0] = 'a' + i; 
+							rook[1] = x->move[2]; 
 							found = 1;
 							break;
 						} else if (board[RANKS - (x->move[2] - '0')][i] != '1') /* We hit a piece */
@@ -339,12 +355,23 @@ int main (int argc, char **argv) {
 					for (i = (x->move[1] - 'a') - 1; !found && i >= 0; i--) /* Look to the left on the rank */
 						if (board[RANKS - (x->move[2] - '0')][i] == c) {
 							board[RANKS - (x->move[2] - '0')][i] = '1';
+							rook[0] = 'a' + i; 
+							rook[1] = x->move[2]; 
 							break;
 						} else if (board[RANKS - (x->move[2] - '0')][i] != '1') /* We hit a piece */
 							break;
 				}
 				/* Set destination square */
 				board[RANKS - (x->move[2] - '0')][x->move[1] - 'a'] = c;
+				/* Moving a rook cancels castling on that side */
+				if 			(strcmp(rook,"h1") == 0) /* White Kingside */
+						castling &= ~CASTLEK;
+				else if (strcmp(rook,"h8") == 0) /* Black Kingside */
+						castling &= ~CASTLEk;
+				else if (strcmp(rook,"a1") == 0) /* White Queenside */
+						castling &= ~CASTLEQ;
+				else if (strcmp(rook,"a8") == 0) /* Black Queenside */
+						castling &= ~CASTLEq;
 				break;
 			case 'N': /* Knight move */
 				c = (turn)?'N':'n';
@@ -357,6 +384,7 @@ int main (int argc, char **argv) {
 					}
 				if (strlen(x->move) == 3) {
 					/* Set origin square */
+					found = 0;
 					if (x->move[2] > '1') { /* Below, level -1 */
 						found = 1;
 						if (x->move[1] > 'b' && board[RANKS - (x->move[2] - '0') + 1][(x->move[1] - 'a') - 2] == c)
@@ -765,6 +793,7 @@ int main (int argc, char **argv) {
 						break;
 					}
 				/* Set origin square */
+				found = 0;
 				if (x->move[2] > '1') { /* Below */
 					found = 1;
 					if (board[RANKS - (x->move[2] - '0') + 1][x->move[1] - 'a'] == c)
@@ -795,6 +824,11 @@ int main (int argc, char **argv) {
 					board[RANKS - (x->move[2] - '0')][(x->move[1] - 'a') + 1] = '1';
 				/* Set destination square */
 				board[RANKS - (x->move[2] - '0')][x->move[1] - 'a'] = c;
+				/* If you move your king you lose castling privileges */
+				if (turn)
+					castling &= ~(CASTLEK | CASTLEQ);
+				else
+					castling &= ~(CASTLEk | CASTLEq);
 				break;
 			case 'O': /* Castling */
 				if (strlen(x->move) == 3) /* O-O */
@@ -821,6 +855,11 @@ int main (int argc, char **argv) {
 						board[7][3] = 'r';
 						board[7][4] = '1';
 					}
+				/* If you have castled, then you can't castle anymore */
+				if (turn)
+					castling &= ~(CASTLEK & CASTLEQ);
+				else
+					castling &= ~(CASTLEk & CASTLEq);
 				break;
 		}
 		x = x->next;
@@ -842,13 +881,29 @@ int main (int argc, char **argv) {
 		fprintf(foutput, "/");
 	}
 	/* The last rank doesn't have "/", so print it now */
+	c = '0';
 	for (i = RANKS-1, j = 0; j < FILES; j++)
-		fprintf(foutput, "%c", board[i][j]);
+		if ('1' == board[i][j])
+			c++; /* ;-P */ 
+		else { 
+			fprintf(foutput, "%c%c", (c != '0')?c:'\0', board[i][j]); /* If we haven't accumulated 1's, don't print c */
+			c = '0';
+		}
+	if (c > '0') /* We finished the loop with accumulated 1's! Print it */
+		fprintf(foutput, "%c", c);
 
 	/* Print the second field of the FEN */
 	/* This field uses the opposite interpretation that we used for the argument "side" */
 	/* In ours, "w" means: position after white's move (meaning black moves next) */
-	fprintf(foutput, " %c", (side == 'w')?'b':'w');
+	fprintf(foutput, " %c ", (side == 'w')?'b':'w');
+
+	/* Print the third field of the FEN */
+	if (!castling)
+		fprintf(foutput, "- ");
+	else	
+		fprintf(foutput, "%c%c%c%c ", (castling & CASTLEK)?'K':'\0', (castling & CASTLEQ)?'Q':'\0', 
+																	(castling & CASTLEk)?'k':'\0', (castling & CASTLEq)?'q':'\0');
+
 
 	exit(EXIT_SUCCESS);
 
