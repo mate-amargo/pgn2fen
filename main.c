@@ -344,6 +344,95 @@ int main (int argc, char **argv) {
 				board[RANKS - (x->move[2] - '0')][x->move[1] - 'a'] = c;
 				break;
 			case 'N': /* Knight move */
+				c = (turn)?'N':'n';
+				/* Remove "x" if any */
+				for (i = 0; x->move[i] != '\0'; i++)
+					if (x->move[i] == 'x') {
+						for (j = i; x->move[j] != '\0'; j++)
+							x->move[j] = x->move[j+1];
+						break;
+					}
+				if (strlen(x->move) == 3) {
+					/* Set origin square */
+					if (x->move[2] > '1') { /* Below, level -1 */
+						found = 1;
+						if (x->move[1] > 'b' && board[RANKS - (x->move[2] - '0') + 1][(x->move[1] - 'a') - 2] == c)
+							board[RANKS - (x->move[2] - '0') + 1][(x->move[1] - 'a') - 2] = '1';
+						else if (x->move[1] < 'g' && board[RANKS - (x->move[2] - '0') + 1][(x->move[1] - 'a') + 2] == c)
+							board[RANKS - (x->move[2] - '0') + 1][(x->move[1] - 'a') + 2] = '1';
+						else if (x->move[2] > '2') { /* Below, level -2 */
+							if (x->move[1] > 'a' && board[RANKS - (x->move[2] - '0') + 2][(x->move[1] - 'a') - 1] == c)
+								board[RANKS - (x->move[2] - '0') + 2][(x->move[1] - 'a') - 1] = '1';
+							else if (x->move[1] < 'h' && board[RANKS - (x->move[2] - '0') + 2][(x->move[1] - 'a') + 1] == c)
+								board[RANKS - (x->move[2] - '0') + 2][(x->move[1] - 'a') + 1] = '1';
+							else
+								found = 0;
+						}	else
+							found = 0;
+					} 
+					if (!found && x->move[2] < '8') { /* Above, level +1 */
+						if (x->move[1] > 'b' && board[RANKS - (x->move[2] - '0') - 1][(x->move[1] - 'a') - 2] == c)
+							board[RANKS - (x->move[2] - '0') - 1][(x->move[1] - 'a') - 2] = '1';
+						else if (x->move[1] < 'g' && board[RANKS - (x->move[2] - '0') - 1][(x->move[1] - 'a') + 2] == c)
+							board[RANKS - (x->move[2] - '0') - 1][(x->move[1] - 'a') + 2] = '1';
+						else if (x->move[2] < '7') { /* Above, level +2 */
+							if (x->move[1] > 'a' && board[RANKS - (x->move[2] - '0') - 2][(x->move[1] - 'a') - 1] == c)
+								board[RANKS - (x->move[2] - '0') - 2][(x->move[1] - 'a') - 1] = '1';
+							else if (x->move[1] < 'h' && board[RANKS - (x->move[2] - '0') - 2][(x->move[1] - 'a') + 1] == c)
+								board[RANKS - (x->move[2] - '0') - 2][(x->move[1] - 'a') + 1] = '1';
+						}
+					}
+					/* Set destination square */
+					board[RANKS - (x->move[2] - '0')][x->move[1] - 'a'] = c;
+				} else if (strlen(x->move) == 4) {
+					/* Set origin square */
+					if (x->move[1] > '8') { /* It's a letter, i.e. a file, then simply the origin file is given to us */
+						found = 0;
+						if (abs(x->move[1] - x->move[2]) > 1) { /* "Horizontal move", like Nbd7, == 2 */
+							if (x->move[3] < '8' && board[RANKS - (x->move[3] - '0') - 1][x->move[1] - 'a'] == c) {
+								board[RANKS - (x->move[3] - '0') - 1][x->move[1] - 'a'] = '1';
+								found = 1;
+							}
+							if (!found && x->move[3] > '1' && board[RANKS - (x->move[3] - '0') + 1][x->move[1] - 'a'] == c) {
+								board[RANKS - (x->move[3] - '0') + 1][x->move[1] - 'a'] = '1';
+								found = 1;
+							}
+						} else { /* "Vertical move", like Nfe6, == 1 */
+							if (!found && x->move[3] < '7' && board[RANKS - (x->move[3] - '0') - 2][x->move[1] - 'a'] == c) {
+								board[RANKS - (x->move[3] - '0') - 2][x->move[1] - 'a'] = '1';
+								found = 1;
+							}
+							if (!found && x->move[3] > '2' && board[RANKS - (x->move[3] - '0') + 2][x->move[1] - 'a'] == c)
+								board[RANKS - (x->move[3] - '0') + 2][x->move[1] - 'a'] = '1';
+						}
+					} else { /* It's a number, the rank is given */
+						found = 0;
+						if (abs(x->move[1] - x->move[3]) > 1) { /* "Vertical move", like N4e6, == 2 */
+							if (x->move[2] > 'a' && board[RANKS - (x->move[1] - '0')][(x->move[2] - 'a') - 1] == c) {
+								board[RANKS - (x->move[1] - '0')][(x->move[2] - 'a') - 1] = '1';
+								found = 1;
+							}
+							if (!found && x->move[2] < 'h' && board[RANKS - (x->move[1] - '0')][(x->move[1] - 'a') + 1] == c) {
+								board[RANKS - (x->move[1] - '0')][(x->move[1] - 'a') + 1] = '1';
+								found = 1;
+							}
+						} else { /* "Horizontal move", like N4d5, == 1 */
+							if (!found && x->move[2] > 'b' && board[RANKS - (x->move[1] - '0')][(x->move[2] - 'a') - 2] == c) {
+								board[RANKS - (x->move[1] - '0')][(x->move[2] - 'a') - 2] = '1';
+								found = 1;
+							}
+							if (!found && x->move[2] < 'g' && board[RANKS - (x->move[1] - '0')][(x->move[1] - 'a') + 2] == c)
+								board[RANKS - (x->move[1] - '0')][(x->move[1] - 'a') + 2] = '1';
+						}
+					}
+					/* Set destination square */
+					board[RANKS - (x->move[3] - '0')][x->move[2] - 'a'] = c;
+				} else { /* strlen(x->move) == 5), e.g. Nb4d5 */
+					/* Set origin square */
+					board[RANKS - (x->move[2] - '0')][x->move[1] - 'a'] = '1';
+					/* Set destination square */
+					board[RANKS - (x->move[4] - '0')][x->move[3] - 'a'] = c;
+				}
 				break;
 			case 'B': /* Bishop move */
 				/* In the ridiculous case that they promote to bishop, we'll have to disambiguate.*/ 
@@ -673,30 +762,27 @@ int main (int argc, char **argv) {
 						break;
 					}
 				/* Set origin square */
-				found = 0;
 				if (x->move[2] > '1') { /* Below */
-					if (board[RANKS - (x->move[2] - '0') + 1][x->move[1] - 'a'] == c) {
+					found = 1;
+					if (board[RANKS - (x->move[2] - '0') + 1][x->move[1] - 'a'] == c)
 						board[RANKS - (x->move[2] - '0') + 1][x->move[1] - 'a'] = '1';
-						found = 1;
-					} else if (!found && x->move[1] > 'a' && board[RANKS - (x->move[2] - '0') + 1][(x->move[1] - 'a') - 1] == c) {
+					else if (x->move[1] > 'a' && board[RANKS - (x->move[2] - '0') + 1][(x->move[1] - 'a') - 1] == c)
 						board[RANKS - (x->move[2] - '0') + 1][(x->move[1] - 'a') - 1] = '1';
-						found = 1;
-					} else if (!found && x->move[1] < 'h' && board[RANKS - (x->move[2] - '0') + 1][(x->move[1] - 'a') + 1] == c) {
+					else if (x->move[1] < 'h' && board[RANKS - (x->move[2] - '0') + 1][(x->move[1] - 'a') + 1] == c)
 						board[RANKS - (x->move[2] - '0') + 1][(x->move[1] - 'a') + 1] = '1';
-						found = 1;
-					}
+					else
+						found = 0;
 				}
 				if (!found && x->move[2] < '8') { /* Above */
-					if (board[RANKS - (x->move[2] - '0') - 1][x->move[1] - 'a'] == c) {
+					found = 1;
+					if (board[RANKS - (x->move[2] - '0') - 1][x->move[1] - 'a'] == c)
 						board[RANKS - (x->move[2] - '0') - 1][x->move[1] - 'a'] = '1';
-						found = 1;
-					} else if (!found && x->move[1] > 'a' && board[RANKS - (x->move[2] - '0') - 1][(x->move[1] - 'a') - 1] == c) {
+					else if (x->move[1] > 'a' && board[RANKS - (x->move[2] - '0') - 1][(x->move[1] - 'a') - 1] == c)
 						board[RANKS - (x->move[2] - '0') - 1][(x->move[1] - 'a') - 1] = '1';
-						found = 1;
-					} else if (!found && x->move[1] < 'h' && board[RANKS - (x->move[2] - '0') - 1][(x->move[1] - 'a') + 1] == c) {
+					else if (x->move[1] < 'h' && board[RANKS - (x->move[2] - '0') - 1][(x->move[1] - 'a') + 1] == c)
 						board[RANKS - (x->move[2] - '0') - 1][(x->move[1] - 'a') + 1] = '1';
-						found = 1;
-					}
+					else
+						found = 0;
 				}
 				if (!found && x->move[1] > 'a' && board[RANKS - (x->move[2] - '0')][(x->move[1] - 'a') - 1] == c) { /* Left */
 					board[RANKS - (x->move[2] - '0')][(x->move[1] - 'a') - 1] = '1';
