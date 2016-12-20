@@ -427,6 +427,43 @@ int main (int argc, char **argv) {
 								break;
 							} else if	(board[RANKS - (x->move[3] -'0') + i][(x->move[2] - 'a') + i] != '1') /* We hit a piece */
 									break;
+					}	else { /* It's a number, i.e. the origin rank is given to us */
+						for (found = 0, i = 1; i <= RANKS - (x->move[3] - '0') && i <= (x->move[2] - 'a'); i++) /* Upper part  \ */
+							if (RANKS - (x->move[3] - '0') - i != RANKS - (x->move[1] - '0'))
+								continue;
+							else if (board[RANKS - (x->move[3] -'0') - i][(x->move[2] - 'a') - i] == c) {
+								board[RANKS - (x->move[3] -'0') - i][(x->move[2] - 'a') - i] = '1';
+								found = 1;
+								break;
+							} else if	(board[RANKS - (x->move[3] -'0') - i][(x->move[2] - 'a') - i] != '1') /* We hit a piece */
+									break;
+						for (i = 1; !found && i <= RANKS - (x->move[3] - '0') && i <= (x->move[2] - 'a'); i++) /* Upper part  / */
+							if (RANKS - (x->move[3] - '0') - i != RANKS - (x->move[1] - '0'))
+								continue;
+							else if (board[RANKS - (x->move[3] -'0') - i][(x->move[2] - 'a') + i] == c) {
+								board[RANKS - (x->move[3] -'0') - i][(x->move[2] - 'a') + i] = '1';
+								found = 1;
+								break;
+							} else if	(board[RANKS - (x->move[3] -'0') - i][(x->move[2] - 'a') + i] != '1') /* We hit a piece */
+									break;
+						for (i = 1; !found && i <= RANKS - (x->move[3] - '0') && i <= (x->move[2] - 'a'); i++) /* Lower part  \ */
+							if (RANKS - (x->move[3] - '0') + i != RANKS - (x->move[1] - '0'))
+								continue;
+							else if (board[RANKS - (x->move[3] -'0') + i][(x->move[2] - 'a') - i] == c) {
+								board[RANKS - (x->move[3] -'0') + i][(x->move[2] - 'a') - i] = '1';
+								found = 1;
+								break;
+							} else if	(board[RANKS - (x->move[3] -'0') + i][(x->move[2] - 'a') - i] != '1') /* We hit a piece */
+									break;
+						for (i = 1; !found && i <= RANKS - (x->move[3] - '0') && i <= (x->move[2] - 'a'); i++) /* Lower part  / */
+							if (RANKS - (x->move[3] - '0') + i != RANKS - (x->move[1] - '0'))
+								continue;
+							else if (board[RANKS - (x->move[3] -'0') + i][(x->move[2] - 'a') + i] == c) {
+								board[RANKS - (x->move[3] -'0') + i][(x->move[2] - 'a') + i] = '1';
+								found = 1;
+								break;
+							} else if	(board[RANKS - (x->move[3] -'0') + i][(x->move[2] - 'a') + i] != '1') /* We hit a piece */
+									break;
 					}
 					/* Set destination square */
 					board[RANKS - (x->move[3] - '0')][x->move[2] - 'a'] = c;
@@ -438,6 +475,192 @@ int main (int argc, char **argv) {
 				}
 				break;
 			case 'Q': /* Queen move */
+				c = (turn)?'Q':'q';
+				/* Remove "x" if any */
+				for (i = 0; x->move[i] != '\0'; i++)
+					if (x->move[i] == 'x') {
+						for (j = i; x->move[j] != '\0'; j++)
+							x->move[j] = x->move[j+1];
+						break;
+					}
+				if (strlen(x->move) == 3) {
+					/* Set origin square */
+					/* Bishop-like: */
+					for (found = 0, i = 1; i <= RANKS - (x->move[2] - '0') && i <= (x->move[1] - 'a'); i++) /* Upper part  \ */
+						if (board[RANKS - (x->move[2] -'0') - i][(x->move[1] - 'a') - i] == c) {
+							board[RANKS - (x->move[2] -'0') - i][(x->move[1] - 'a') - i] = '1';
+							found = 1;
+							break;
+						} else if	(board[RANKS - (x->move[2] -'0') - i][(x->move[1] - 'a') - i] != '1') /* We hit a piece */
+								break;
+					for (i = 1; !found && i <= RANKS - (x->move[2] - '0') && i <= FILES - (x->move[1] - 'a'); i++) /* Upper part / */
+						if (board[RANKS - (x->move[2] -'0') - i][(x->move[1] - 'a') + i] == c) {
+							board[RANKS - (x->move[2] -'0') - i][(x->move[1] - 'a') + i] = '1';
+							found = 1;
+							break;
+						} else if	(board[RANKS - (x->move[2] -'0') - i][(x->move[1] - 'a') + i] != '1') /* We hit a piece */
+								break;
+					for (i = 1; !found && i <= (x->move[2] - '0') && i <= (x->move[1] - 'a'); i++) /* Lower part \ */
+						if (board[RANKS - (x->move[2] -'0') + i][(x->move[1] - 'a') - i] == c) {
+							board[RANKS - (x->move[2] -'0') + i][(x->move[1] - 'a') - i] = '1';
+							found = 1;
+							break;
+						} else if	(board[RANKS - (x->move[2] -'0') + i][(x->move[1] - 'a') - i] != '1') /* We hit a piece */
+								break;
+					for (i = 1; !found && i <= (x->move[2] - '0') && i <= FILES - (x->move[1] - 'a'); i++) /* Lower part / */
+						if (board[RANKS - (x->move[2] -'0') + i][(x->move[1] - 'a') + i] == c) {
+							board[RANKS - (x->move[2] -'0') + i][(x->move[1] - 'a') + i] = '1';
+							found = 1;
+							break;
+						} else if	(board[RANKS - (x->move[2] -'0') + i][(x->move[1] - 'a') + i] != '1') /* We hit a piece */
+								break;
+					/* Rook-like: */
+					for (i = RANKS - (x->move[2] - '0') + 1; !found && i < RANKS; i++) /* Look down on the file */
+						if (board[i][x->move[1] - 'a'] == c) {
+							board[i][x->move[1] - 'a'] = '1';
+							found = 1;
+							break;
+						} else if (board[i][x->move[1] - 'a'] != '1') /* We hit a piece */
+							break;
+					for (i = RANKS - (x->move[2] - '0') - 1; !found && i >= 0; i--) /* Look up on the file */
+						if (board[i][x->move[1] - 'a'] == c) {
+							board[i][x->move[1] - 'a'] = '1';
+							found = 1;
+							break;
+						} else if (board[i][x->move[1] - 'a'] != '1') /* We hit a piece */
+							break;
+					for (i = (x->move[1] - 'a') + 1; !found && i < FILES; i++) /* Look to the right on the rank */
+						if (board[RANKS - (x->move[2] - '0')][i] == c) {
+							board[RANKS - (x->move[2] - '0')][i] = '1';
+							found = 1;
+							break;
+						} else if (board[RANKS - (x->move[2] - '0')][i] != '1') /* We hit a piece */
+							break;
+					for (i = (x->move[1] - 'a') - 1; !found && i >= 0; i--) /* Look to the left on the rank */
+						if (board[RANKS - (x->move[2] - '0')][i] == c) {
+							board[RANKS - (x->move[2] - '0')][i] = '1';
+							break;
+						} else if (board[RANKS - (x->move[2] - '0')][i] != '1') /* We hit a piece */
+							break;
+					/* Set destination square */
+					board[RANKS - (x->move[2] - '0')][x->move[1] - 'a'] = c;
+				} else if (strlen(x->move) == 4) {
+					/* Set origin square */
+					/* Bishop-like: */
+					if (x->move[1] > '8') { /* It's a letter, the origin file is given to us. Qbe4 */
+						for (found = 0, i = 1; i <= RANKS - (x->move[3] - '0') && i <= (x->move[2] - 'a'); i++) /* Upper part  \ */
+							if ((x->move[2] - 'a') - i != (x->move[1] - 'a'))
+								continue;
+							else if (board[RANKS - (x->move[3] -'0') - i][(x->move[2] - 'a') - i] == c) {
+								board[RANKS - (x->move[3] -'0') - i][(x->move[2] - 'a') - i] = '1';
+								found = 1;
+								break;
+							} else if	(board[RANKS - (x->move[3] -'0') - i][(x->move[2] - 'a') - i] != '1') /* We hit a piece */
+									break;
+						for (i = 1; !found && i <= RANKS - (x->move[3] - '0') && i <= (x->move[2] - 'a'); i++) /* Upper part  / */
+							if ((x->move[2] - 'a') + i != (x->move[1] - 'a'))
+								continue;
+							else if (board[RANKS - (x->move[3] -'0') - i][(x->move[2] - 'a') + i] == c) {
+								board[RANKS - (x->move[3] -'0') - i][(x->move[2] - 'a') + i] = '1';
+								found = 1;
+								break;
+							} else if	(board[RANKS - (x->move[3] -'0') - i][(x->move[2] - 'a') + i] != '1') /* We hit a piece */
+									break;
+						for (i = 1; !found && i <= RANKS - (x->move[3] - '0') && i <= (x->move[2] - 'a'); i++) /* Lower part  \ */
+							if ((x->move[2] - 'a') - i != (x->move[1] - 'a'))
+								continue;
+							else if (board[RANKS - (x->move[3] -'0') + i][(x->move[2] - 'a') - i] == c) {
+								board[RANKS - (x->move[3] -'0') + i][(x->move[2] - 'a') - i] = '1';
+								found = 1;
+								break;
+							} else if	(board[RANKS - (x->move[3] -'0') + i][(x->move[2] - 'a') - i] != '1') /* We hit a piece */
+									break;
+						for (i = 1; !found && i <= RANKS - (x->move[3] - '0') && i <= (x->move[2] - 'a'); i++) /* Lower part  / */
+							if ((x->move[2] - 'a') + i != (x->move[1] - 'a'))
+								continue;
+							else if (board[RANKS - (x->move[3] -'0') + i][(x->move[2] - 'a') + i] == c) {
+								board[RANKS - (x->move[3] -'0') + i][(x->move[2] - 'a') + i] = '1';
+								found = 1;
+								break;
+							} else if	(board[RANKS - (x->move[3] -'0') + i][(x->move[2] - 'a') + i] != '1') /* We hit a piece */
+									break;
+					}	else { /* It's a number, i.e. the origin rank is given to us */
+						for (found = 0, i = 1; i <= RANKS - (x->move[3] - '0') && i <= (x->move[2] - 'a'); i++) /* Upper part  \ */
+							if (RANKS - (x->move[3] - '0') - i != RANKS - (x->move[1] - '0'))
+								continue;
+							else if (board[RANKS - (x->move[3] -'0') - i][(x->move[2] - 'a') - i] == c) {
+								board[RANKS - (x->move[3] -'0') - i][(x->move[2] - 'a') - i] = '1';
+								found = 1;
+								break;
+							} else if	(board[RANKS - (x->move[3] -'0') - i][(x->move[2] - 'a') - i] != '1') /* We hit a piece */
+									break;
+						for (i = 1; !found && i <= RANKS - (x->move[3] - '0') && i <= (x->move[2] - 'a'); i++) /* Upper part  / */
+							if (RANKS - (x->move[3] - '0') - i != RANKS - (x->move[1] - '0'))
+								continue;
+							else if (board[RANKS - (x->move[3] -'0') - i][(x->move[2] - 'a') + i] == c) {
+								board[RANKS - (x->move[3] -'0') - i][(x->move[2] - 'a') + i] = '1';
+								found = 1;
+								break;
+							} else if	(board[RANKS - (x->move[3] -'0') - i][(x->move[2] - 'a') + i] != '1') /* We hit a piece */
+									break;
+						for (i = 1; !found && i <= RANKS - (x->move[3] - '0') && i <= (x->move[2] - 'a'); i++) /* Lower part  \ */
+							if (RANKS - (x->move[3] - '0') + i != RANKS - (x->move[1] - '0'))
+								continue;
+							else if (board[RANKS - (x->move[3] -'0') + i][(x->move[2] - 'a') - i] == c) {
+								board[RANKS - (x->move[3] -'0') + i][(x->move[2] - 'a') - i] = '1';
+								found = 1;
+								break;
+							} else if	(board[RANKS - (x->move[3] -'0') + i][(x->move[2] - 'a') - i] != '1') /* We hit a piece */
+									break;
+						for (i = 1; !found && i <= RANKS - (x->move[3] - '0') && i <= (x->move[2] - 'a'); i++) /* Lower part  / */
+							if (RANKS - (x->move[3] - '0') + i != RANKS - (x->move[1] - '0'))
+								continue;
+							else if (board[RANKS - (x->move[3] -'0') + i][(x->move[2] - 'a') + i] == c) {
+								board[RANKS - (x->move[3] -'0') + i][(x->move[2] - 'a') + i] = '1';
+								found = 1;
+								break;
+							} else if	(board[RANKS - (x->move[3] -'0') + i][(x->move[2] - 'a') + i] != '1') /* We hit a piece */
+									break;
+					}
+					/* Rook-like: */
+					if (x->move[1] > '8') { /* It's a letter, i.e. a file, then simply the origin file is given to us */
+						for (found = 0, i = RANKS - (x->move[3] - '0') + 1; i < RANKS; i++) /* Look down on the file */
+							if (board[i][x->move[1] - 'a'] == c) {
+								board[i][x->move[1] - 'a'] = '1';
+								found = 1;
+								break;
+							} else if (board[i][x->move[1] - 'a'] != '1') /* We hit a piece */
+								break;
+						for (i = RANKS - (x->move[3] - '0') - 1; !found && i >= 0; i--) /* Look up on the file */
+							if (board[i][x->move[1] - 'a'] == c) {
+								board[i][x->move[1] - 'a'] = '1';
+								break;
+							} else if (board[i][x->move[1] - 'a'] != '1') /* We hit a piece */
+								break;
+					}	else { /* It's a number, i.e. the origin rank is given to us */
+						board[RANKS - (x->move[1] - '0')][x->move[2] - 'a'] = '1';
+						for (found = 0, i = (x->move[2] - 'a') + 1; i < FILES; i++) /* Look to the right on the rank */
+							if (board[RANKS - (x->move[1] - '0')][i] == c) {
+								board[RANKS - (x->move[1] - '0')][i] = '1';
+								found = 1;
+								break;
+							} else if (board[RANKS - (x->move[1] - '0')][i] != '1') /* We hit a piece */
+								break;
+						for (i = (x->move[2] - 'a') - 1; !found && i >= 0; i--) /* Look to the left on the rank */
+							if (board[RANKS - (x->move[1] - '0')][i] == c) {
+								board[RANKS - (x->move[1] - '0')][i] = '1';
+								break;
+							} else if (board[RANKS - (x->move[1] - '0')][i] != '1') /* We hit a piece */
+								break;
+					}
+					/* Set destination square */
+					board[RANKS - (x->move[3] - '0')][x->move[2] - 'a'] = c;
+				} else { /* strlen(x->move) == 5, e.g. Qf5g4*/
+					/* Set origin square */
+					board[RANKS - (x->move[2] - '0')][x->move[1] - 'a'] = '1';
+					/* Set destination square */
+					board[RANKS - (x->move[4] - '0')][x->move[3] - 'a'] = c;
+				}
 				break;
 			case 'K': /* King move */
 				break;
