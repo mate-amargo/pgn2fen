@@ -663,6 +663,49 @@ int main (int argc, char **argv) {
 				}
 				break;
 			case 'K': /* King move */
+				/* No need to disambiguate! There's never more than 1 king per-side. Halleluja! */
+				c = (turn)?'K':'k';
+				/* Remove "x" if any */
+				for (i = 0; x->move[i] != '\0'; i++)
+					if (x->move[i] == 'x') {
+						for (j = i; x->move[j] != '\0'; j++)
+							x->move[j] = x->move[j+1];
+						break;
+					}
+				/* Set origin square */
+				found = 0;
+				if (x->move[2] > '1') { /* Below */
+					if (board[RANKS - (x->move[2] - '0') + 1][x->move[1] - 'a'] == c) {
+						board[RANKS - (x->move[2] - '0') + 1][x->move[1] - 'a'] = '1';
+						found = 1;
+					} else if (!found && x->move[1] > 'a' && board[RANKS - (x->move[2] - '0') + 1][(x->move[1] - 'a') - 1] == c) {
+						board[RANKS - (x->move[2] - '0') + 1][(x->move[1] - 'a') - 1] = '1';
+						found = 1;
+					} else if (!found && x->move[1] < 'h' && board[RANKS - (x->move[2] - '0') + 1][(x->move[1] - 'a') + 1] == c) {
+						board[RANKS - (x->move[2] - '0') + 1][(x->move[1] - 'a') + 1] = '1';
+						found = 1;
+					}
+				}
+				if (!found && x->move[2] < '8') { /* Above */
+					if (board[RANKS - (x->move[2] - '0') - 1][x->move[1] - 'a'] == c) {
+						board[RANKS - (x->move[2] - '0') - 1][x->move[1] - 'a'] = '1';
+						found = 1;
+					} else if (!found && x->move[1] > 'a' && board[RANKS - (x->move[2] - '0') - 1][(x->move[1] - 'a') - 1] == c) {
+						board[RANKS - (x->move[2] - '0') - 1][(x->move[1] - 'a') - 1] = '1';
+						found = 1;
+					} else if (!found && x->move[1] < 'h' && board[RANKS - (x->move[2] - '0') - 1][(x->move[1] - 'a') + 1] == c) {
+						board[RANKS - (x->move[2] - '0') - 1][(x->move[1] - 'a') + 1] = '1';
+						found = 1;
+					}
+				}
+				if (!found && x->move[1] > 'a' && board[RANKS - (x->move[2] - '0')][(x->move[1] - 'a') - 1] == c) { /* Left */
+					board[RANKS - (x->move[2] - '0')][(x->move[1] - 'a') - 1] = '1';
+					found = 1;
+				}
+				if (!found && x->move[1] < 'h' && board[RANKS - (x->move[2] - '0')][(x->move[1] - 'a') + 1] == c) /* Right */
+					board[RANKS - (x->move[2] - '0')][(x->move[1] - 'a') + 1] = '1';
+				/* Set destination square */
+				board[RANKS - (x->move[2] - '0')][x->move[1] - 'a'] = c;
 				break;
 			case 'O': /* Castling */
 				if (strlen(x->move) == 3) /* O-O */
