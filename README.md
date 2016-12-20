@@ -1,6 +1,48 @@
 # pgn2fen
 Extracts FEN of a specific move on a PGN game
 
+Compile:
+-------
+There's a Makefile just for that purpose, simply run:
+make
+
+Instalation:
+-----------
+Sorry, no install commands or scripts. Just have fun, if you like it, install it by hand :)
+
+Running the program:
+--------------------
+Running the program with no arguments, or with an invalid set of arguments will produce the following help:
+
+Usage: ./pgn2fen input_game.pgn move [w/b] [output_position.fen]
+  input_game.pgn       - A chess game in PGN format.
+  move                 - A move number.
+  w/b                  - OPTIONAL. Position reached after (w)hite or (b)lack move. Defaults to w.
+  output_position.fen  - OPTIONAL. Output file. If not specified the output will be written to stdout.
+
+
+For example, if game.png contains:
+1. e4 c5 2. Nf3 d6
+To print the position after white's second move:
+./pgn2fen game.pgn 2
+rnbqkbnr/pp1ppppp/8/2p5/4P3/5N2/PPPP1PPP/RNBQKB1R b KQkq - 1 2
+To print the position after black's second move:
+./pgn2fen game.pgn 2 b
+rnbqkbnr/pp2pppp/3p4/2p5/4P3/5N2/PPPP1PPP/RNBQKB1R w KQkq - 0 3
+
+Note: Since there's no way to get the initial position, i.e. before any player moves,
+I'll provide it in case you need that:
+rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
+
+
+About PGN
+=========
+
+Portable Game Notation (PGN) is a plain text computer-processible format for recording chess games (both the moves and related data), supported by many chess programs.
+
+PGN code begins with a set of "tag pairs" (a tag name and its value), followed by the "movetext" (chess moves with optional commentary). Moves are recorded using Standard Algebraic Notation.
+
+
 About FEN
 =========
 
@@ -16,7 +58,7 @@ A FEN record contains six fields. The separator between fields is a space. The f
 
 3. Castling availability. If neither side can castle, this is "-". Otherwise, this has one or more letters: "K" (White can castle kingside), "Q" (White can castle queenside), "k" (Black can castle kingside), and/or "q" (Black can castle queenside).
 
-4. En passant target square in algebraic notation. If there's no en passant target square, this is "-". If a pawn has just made a two-square move, this is the position "behind" the pawn. This is recorded regardless of whether there is a pawn in position to make an en passant capture.[2]
+4. En passant target square in algebraic notation. If there's no en passant target square, this is "-". If a pawn has just made a two-square move, this is the position "behind" the pawn. This is recorded regardless of whether there is a pawn in position to make an en passant capture.
 
 5. Halfmove clock: This is the number of halfmoves since the last capture or pawn advance. This is used to determine if a draw can be claimed under the fifty-move rule.
 
