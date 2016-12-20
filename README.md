@@ -27,16 +27,25 @@ Usage: ./pgn2fen input_game.pgn move [w/b] [output_position.fen]
 
 
 For example, if game.png contains:
+
 1. e4 c5 2. Nf3 d6
+
 To print the position after white's second move:
+
 ./pgn2fen game.pgn 2
+
 rnbqkbnr/pp1ppppp/8/2p5/4P3/5N2/PPPP1PPP/RNBQKB1R b KQkq - 1 2
+
 To print the position after black's second move:
+
 ./pgn2fen game.pgn 2 b
+
 rnbqkbnr/pp2pppp/3p4/2p5/4P3/5N2/PPPP1PPP/RNBQKB1R w KQkq - 0 3
 
 Note: Since there's no way to get the initial position, i.e. before any player moves,
+
 I'll provide it in case you need that:
+
 rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
 
 
