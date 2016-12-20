@@ -87,6 +87,9 @@ int main (int argc, char **argv) {
 		printf("To print the position after black's second move:\n");
 		printf("%s game.pgn 2 b\n", argv[0]);
 		printf("rnbqkbnr/pp2pppp/3p4/2p5/4P3/5N2/PPPP1PPP/RNBQKB1R w KQkq - 0 3\n");
+		printf("\nNote: Since there's no way to get the initial position, i.e. before any player moves,\n");
+		printf("I'll provide it in case you need that:\n");
+		printf("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1\n");
 		exit(EXIT_FAILURE);
 	}
 	/* Everything is ok, now let's work: */
@@ -842,6 +845,10 @@ int main (int argc, char **argv) {
 	for (i = RANKS-1, j = 0; j < FILES; j++)
 		fprintf(foutput, "%c", board[i][j]);
 
+	/* Print the second field of the FEN */
+	/* This field uses the opposite interpretation that we used for the argument "side" */
+	/* In ours, "w" means: position after white's move (meaning black moves next) */
+	fprintf(foutput, " %c", (side == 'w')?'b':'w');
 
 	exit(EXIT_SUCCESS);
 
