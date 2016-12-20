@@ -930,6 +930,10 @@ int main (int argc, char **argv) {
 	/* Print the fifth field of the FEN */
 	fprintf(foutput, "%d ", ply);
 	
+	/* Print the sixth field of the FEN */
+	/* Full move: It starts at 1, and is incremented after Black's move. We have the move number in "move" */
+	/* All we need to do is add 1 to that if it's the position after black moved, as indicated by "side" */
+	fprintf(foutput, "%d\n", (side == 'w')?move:move+1);
 
 	exit(EXIT_SUCCESS);
 
