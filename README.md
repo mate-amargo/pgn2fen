@@ -4,6 +4,7 @@ Extracts FEN of a specific move on a PGN game
 Compile:
 -------
 There's a Makefile just for that purpose, simply run:
+
 make
 
 Instalation:
@@ -15,9 +16,13 @@ Running the program:
 Running the program with no arguments, or with an invalid set of arguments will produce the following help:
 
 Usage: ./pgn2fen input_game.pgn move [w/b] [output_position.fen]
+
   input_game.pgn       - A chess game in PGN format.
+
   move                 - A move number.
+
   w/b                  - OPTIONAL. Position reached after (w)hite or (b)lack move. Defaults to w.
+
   output_position.fen  - OPTIONAL. Output file. If not specified the output will be written to stdout.
 
 
