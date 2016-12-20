@@ -826,8 +826,16 @@ int main (int argc, char **argv) {
 
 	/* Print the first field of the FEN */
 	for (i = 0; i < RANKS-1; i++) {
-		for (j = 0; j < FILES; j++)
-			fprintf(foutput, "%c", board[i][j]);
+		c = '0'; /* We'll accumulate the 1's in "c". Reset it for every rank */
+		for (j = 0; j < FILES; j++) 
+			if ('1' == board[i][j])
+				c++; /* ;-P */ 
+			else { 
+				fprintf(foutput, "%c%c", (c != '0')?c:'\0', board[i][j]); /* If we haven't accumulated 1's, don't print c */
+				c = '0';
+			}
+		if (c > '0') /* We finished the loop with accumulated 1's! Print it */
+				fprintf(foutput, "%c", c);
 		fprintf(foutput, "/");
 	}
 	/* The last rank doesn't have "/", so print it now */
