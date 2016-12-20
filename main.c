@@ -1,7 +1,7 @@
 /*
  *  pgn2fen - Extracts FEN of a specific move on a PGN game
  *  -------------------------------------------------------
- *  Author: mate_amargo
+ *  Author: mate_amargo - Juan Alberto Regalado Galván
  *  https://github.com/mate-amargo/pgn2fen
  *  -------------------------------------------------------
  *
@@ -174,12 +174,12 @@ int main (int argc, char **argv) {
 				case ' ': case '\n': /* Finish reading the move. Break out of the loop */
 					if (feof(finput)) /* We reached EOF while saving the last move! */
 						clearerr(finput); /* Clear the EOF flag */
-					breakout = 1;
+					if (strlen(y->move) > 0) /* Don't save empty lines */
+						breakout = 1;
 					break;
 			}
 		}
 
-//		printf("\"%s\"\n", y->move);	
 		x->next = y;
 		x = y;
 		ply++;
@@ -849,27 +849,27 @@ int main (int argc, char **argv) {
 			case 'O': /* Castling */
 				if (strlen(x->move) == 3) /* O-O */
 					if (turn) { /* I could do smth crazy to save the if, like board[7*(1-turn)][]. But 1 "if" is faster than 4 multiplications, is it? */
-						board[0][4] = '1';
-						board[0][5] = 'R';
-						board[0][6] = 'K';
-						board[0][7] = '1';
-					} else {
 						board[7][4] = '1';
-						board[7][5] = 'r';
-						board[7][6] = 'k';
+						board[7][5] = 'R';
+						board[7][6] = 'K';
 						board[7][7] = '1';
+					} else {
+						board[0][4] = '1';
+						board[0][5] = 'r';
+						board[0][6] = 'k';
+						board[0][7] = '1';
 					}
 				else /* strlen(x->move) == 5; O-O-O */ 
 					if (turn) {
-						board[0][0] = '1';
-						board[0][2] = 'K';
-						board[0][3] = 'R';
-						board[0][4] = '1';
-					} else {
 						board[7][0] = '1';
-						board[7][2] = 'k';
-						board[7][3] = 'r';
+						board[7][2] = 'K';
+						board[7][3] = 'R';
 						board[7][4] = '1';
+					} else {
+						board[0][0] = '1';
+						board[0][2] = 'k';
+						board[0][3] = 'r';
+						board[0][4] = '1';
 					}
 				/* If you have castled, then you can't castle anymore */
 				if (turn)
