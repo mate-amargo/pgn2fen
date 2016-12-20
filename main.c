@@ -217,7 +217,7 @@ int main (int argc, char **argv) {
 	char castling = CASTLEK | CASTLEQ | CASTLEk | CASTLEq; /* Third field of the FEN: KQkq, each letter represents a bit */
 	int turn = WHITE;
 	int enpassant = 0;
-	char target[2]; /* Enpassant traget square */
+	char target; /* Enpassant traget square. If it's a white pawn push the rank will always be 3, and 6 for black */
 	char rook[2]; /* Rook origin for castling tests */
 	int found = 0;
 
@@ -237,6 +237,7 @@ int main (int argc, char **argv) {
 						board[0][x->move[i-2] - 'a'] = x->move[i+1];
 					else /* Black */
 						board[RANKS-1][x->move[i-2] - 'a'] = tolower(x->move[i+1]); /* Promotions are uppercase */
+					enpassant = 0;
 				} else if (strlen(x->move) > 2) { /* Move with capture */
 					/* Set origin square */
 					if (turn)
@@ -250,8 +251,8 @@ int main (int argc, char **argv) {
 							board[RANKS - (x->move[3] - '0') + 1][x->move[2] - 'a'] = '1';
 						else if ((x->move[3] - '0') + 1 == 4) /* If the capturing pawn is black it must be on rank 4 */
 							board[RANKS - (x->move[3] - '0') - 1][x->move[2] - 'a'] = '1';
-						enpassant = 0;
 					}
+					enpassant = 0;
 					/* Set destination square */
 					/* Parenthesis are important, otherwise because RANKS is an int, the chars will get promoted and we'll get a wrong result */
 					board[RANKS - (x->move[3] - '0')][x->move[2] - 'a'] = (turn)?'P':'p';
@@ -261,9 +262,11 @@ int main (int argc, char **argv) {
 					if (turn && '4' == x->move[1] && board[6][x->move[0] - 'a'] == 'P') { /* The pawn could've came from white's first move */
 						board[6][x->move[0] - 'a'] = '1';
 						enpassant = 1;
+						target = x->move[0];
 					}	else if (!turn && '5' == x->move[1] && board[1][x->move[0] - 'a'] == 'p') { /* The pawn could've came from black's first move */
 						board[1][x->move[0] - 'a'] = '1';
 						enpassant = 1;
+						target = x->move[0];
 					} else if (turn) /* White pawn push */
 						board[RANKS - (x->move[1] - '0') + 1][x->move[0] - 'a'] = '1';
 					else /* Black pawn push */
@@ -372,6 +375,7 @@ int main (int argc, char **argv) {
 						castling &= ~CASTLEQ;
 				else if (strcmp(rook,"a8") == 0) /* Black Queenside */
 						castling &= ~CASTLEq;
+				enpassant = 0; /* Piece move cancels enpassant opportunity*/
 				break;
 			case 'N': /* Knight move */
 				c = (turn)?'N':'n';
@@ -464,6 +468,7 @@ int main (int argc, char **argv) {
 					/* Set destination square */
 					board[RANKS - (x->move[4] - '0')][x->move[3] - 'a'] = c;
 				}
+				enpassant = 0; /* Piece move cancels enpassant opportunity*/
 				break;
 			case 'B': /* Bishop move */
 				/* In the ridiculous case that they promote to bishop, we'll have to disambiguate.*/ 
@@ -593,6 +598,7 @@ int main (int argc, char **argv) {
 					/* Set destination square */
 					board[RANKS - (x->move[4] - '0')][x->move[3] - 'a'] = c;
 				}
+				enpassant = 0; /* Piece move cancels enpassant opportunity*/
 				break;
 			case 'Q': /* Queen move */
 				c = (turn)?'Q':'q';
@@ -781,6 +787,7 @@ int main (int argc, char **argv) {
 					/* Set destination square */
 					board[RANKS - (x->move[4] - '0')][x->move[3] - 'a'] = c;
 				}
+				enpassant = 0; /* Piece move cancels enpassant opportunity*/
 				break;
 			case 'K': /* King move */
 				/* No need to disambiguate! There's never more than 1 king per-side. Halleluja! */
@@ -830,6 +837,7 @@ int main (int argc, char **argv) {
 				else
 					castling &= ~(CASTLEk | CASTLEq);
 				break;
+				enpassant = 0; /* Piece move cancels enpassant opportunity*/
 			case 'O': /* Castling */
 				if (strlen(x->move) == 3) /* O-O */
 					if (turn) { /* I could do smth crazy to save the if, like board[7*(1-turn)][]. But 1 "if" is faster than 4 multiplications, is it? */
@@ -861,6 +869,7 @@ int main (int argc, char **argv) {
 				else
 					castling &= ~(CASTLEk & CASTLEq);
 				break;
+				enpassant = 0; /* Piece move cancels enpassant opportunity*/
 		}
 		x = x->next;
 		turn = (turn)?BLACK:WHITE; /* Toggle turn */
@@ -904,6 +913,11 @@ int main (int argc, char **argv) {
 		fprintf(foutput, "%c%c%c%c ", (castling & CASTLEK)?'K':'\0', (castling & CASTLEQ)?'Q':'\0', 
 																	(castling & CASTLEk)?'k':'\0', (castling & CASTLEq)?'q':'\0');
 
+	/* Print the fourth field of the FEN */
+	if (enpassant)
+		fprintf(foutput, "%c%d ", target, (side == 'w')?3:6);
+	else
+		fprintf(foutput, "- ");
 
 	exit(EXIT_SUCCESS);
 
