@@ -220,9 +220,11 @@ int main (int argc, char **argv) {
 	char target; /* Enpassant traget square. If it's a white pawn push the rank will always be 3, and 6 for black */
 	char rook[2]; /* Rook origin for castling tests */
 	int found = 0;
+	ply = 0; /* Re-using variables, yay! This time it will be the ply clock, the fifth field of the FEN */
 
 	x = list->next; /* Skip the empty item */
 	while (x) {
+		ply++; /* Advance halfmove clock. It could be reset later */
 		switch (x->move[0]) {
 			case 'a':	case 'b':	case 'c':	case 'd':	case 'e':	case 'f':	case 'g':	case 'h': /* Pawn move */
 				if (strstr(x->move,"=")) { /* Pawn promotion */
@@ -274,12 +276,14 @@ int main (int argc, char **argv) {
 					/* Set destination square */
 					board[RANKS - (x->move[1] - '0')][x->move[0] - 'a'] = (turn)?'P':'p';
 				}
+				ply = 0; /* Pawn move or capture resets the halfmove clock */
 				break;
 			case 'R': /* Rook move */
 				c = (turn)?'R':'r'; /* Set piece. Altough it would be clearer to define a new var "piece", I prefer to be confusing and reuse vars */
 				/* Remove "x" if any */
 				for (i = 0; x->move[i] != '\0'; i++)
 					if (x->move[i] == 'x') {
+						ply = 0; /* Capture resets the halfmove clock */
 						for (j = i; x->move[j] != '\0'; j++)
 							x->move[j] = x->move[j+1];
 						break;
@@ -382,6 +386,7 @@ int main (int argc, char **argv) {
 				/* Remove "x" if any */
 				for (i = 0; x->move[i] != '\0'; i++)
 					if (x->move[i] == 'x') {
+						ply = 0; /* Capture resets the halfmove clock */
 						for (j = i; x->move[j] != '\0'; j++)
 							x->move[j] = x->move[j+1];
 						break;
@@ -477,6 +482,7 @@ int main (int argc, char **argv) {
 				/* Remove "x" if any */
 				for (i = 0; x->move[i] != '\0'; i++)
 					if (x->move[i] == 'x') {
+						ply = 0; /* Capture resets the halfmove clock */
 						for (j = i; x->move[j] != '\0'; j++)
 							x->move[j] = x->move[j+1];
 						break;
@@ -605,6 +611,7 @@ int main (int argc, char **argv) {
 				/* Remove "x" if any */
 				for (i = 0; x->move[i] != '\0'; i++)
 					if (x->move[i] == 'x') {
+						ply = 0; /* Capture resets the halfmove clock */
 						for (j = i; x->move[j] != '\0'; j++)
 							x->move[j] = x->move[j+1];
 						break;
@@ -795,6 +802,7 @@ int main (int argc, char **argv) {
 				/* Remove "x" if any */
 				for (i = 0; x->move[i] != '\0'; i++)
 					if (x->move[i] == 'x') {
+						ply = 0; /* Capture resets the halfmove clock */
 						for (j = i; x->move[j] != '\0'; j++)
 							x->move[j] = x->move[j+1];
 						break;
@@ -918,6 +926,10 @@ int main (int argc, char **argv) {
 		fprintf(foutput, "%c%d ", target, (side == 'w')?3:6);
 	else
 		fprintf(foutput, "- ");
+
+	/* Print the fifth field of the FEN */
+	fprintf(foutput, "%d ", ply);
+	
 
 	exit(EXIT_SUCCESS);
 
