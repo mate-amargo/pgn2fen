@@ -400,7 +400,7 @@ int main (int argc, char **argv) {
 						castling &= ~CASTLEQ;
 				else if (strcmp(rook,"a8") == 0) /* Black Queenside */
 						castling &= ~CASTLEq;
-				enpassant = 0; /* Piece move cancels enpassant opportunity*/
+				enpassant = 0; /* Piece move cancels enpassant opportunity */
 				break;
 			case 'N': /* Knight move */
 				c = (turn)?'N':'n';
@@ -494,7 +494,7 @@ int main (int argc, char **argv) {
 					/* Set destination square */
 					board[RANKS - (x->move[4] - '0')][x->move[3] - 'a'] = c;
 				}
-				enpassant = 0; /* Piece move cancels enpassant opportunity*/
+				enpassant = 0; /* Piece move cancels enpassant opportunity */
 				break;
 			case 'B': /* Bishop move */
 				/* In the ridiculous case that they promote to bishop, we'll have to disambiguate.*/ 
@@ -565,7 +565,7 @@ int main (int argc, char **argv) {
 					/* Set destination square */
 					board[RANKS - (x->move[4] - '0')][x->move[3] - 'a'] = c;
 				}
-				enpassant = 0; /* Piece move cancels enpassant opportunity*/
+				enpassant = 0; /* Piece move cancels enpassant opportunity */
 				break;
 			case 'Q': /* Queen move */
 				c = (turn)?'Q':'q';
@@ -641,20 +641,28 @@ int main (int argc, char **argv) {
 				} else if (strlen(x->move) == 4) {
 					/* Set origin square */
 					/* Bishop-like: */
+					found = 0;
 					if (x->move[1] > '8') { /* It's a letter, the origin file is given to us. Bbe4 */
 						if (abs(x->move[1] - x->move[2]) <= RANKS - (x->move[3] - '0') && 
-						board[RANKS - (x->move[3] - '0') - abs(x->move[1] - x->move[2])][x->move[1] - 'a'] == c) /* / */
+						board[RANKS - (x->move[3] - '0') - abs(x->move[1] - x->move[2])][x->move[1] - 'a'] == c) { /* / */
 							board[RANKS - (x->move[3] - '0') - abs(x->move[1] - x->move[2])][x->move[1] - 'a'] = '1';
-						else if (abs(x->move[1] - x->move[2]) < (x->move[3] - '0') && 
-						board[RANKS - (x->move[3] - '0') + abs(x->move[1] - x->move[2])][x->move[1] - 'a'] == c) /* \ */
+							found = 1;
+						} else if (abs(x->move[1] - x->move[2]) < (x->move[3] - '0') && 
+						board[RANKS - (x->move[3] - '0') + abs(x->move[1] - x->move[2])][x->move[1] - 'a'] == c) { /* \ */
 							board[RANKS - (x->move[3] - '0') + abs(x->move[1] - x->move[2])][x->move[1] - 'a'] = '1';
+							found = 1;
+						}
 					}	else { /* It's a number, i.e. the origin rank is given to us */
 						if ((x->move[2] - 'a') + abs(x->move[3] - x->move[1]) < FILES && 
-						board[RANKS - (x->move[1] - '0')][(x->move[2] - 'a') + abs(x->move[3] - x->move[1])] == c) /* / */
+						board[RANKS - (x->move[1] - '0')][(x->move[2] - 'a') + abs(x->move[3] - x->move[1])] == c) { /* / */
 							board[RANKS - (x->move[1] - '0')][(x->move[2] - 'a') + abs(x->move[3] - x->move[1])] = '1';
+							found = 1;
+						}
 						else if (abs(x->move[3] - x->move[1]) < (x->move[2] - 'a') && 
-						board[RANKS - (x->move[1] - '0')][(x->move[2] - 'a') - abs(x->move[3] - x->move[1])] == c) /* \ */
+						board[RANKS - (x->move[1] - '0')][(x->move[2] - 'a') - abs(x->move[3] - x->move[1])] == c) { /* \ */
 							board[RANKS - (x->move[1] - '0')][(x->move[2] - 'a') - abs(x->move[3] - x->move[1])] = '1';
+							found = 1;
+						}
 					}
 					/* Rook-like: */
 					if (!found && x->move[1] > '8') { /* It's a letter, i.e. a file, then simply the origin file is given to us */
@@ -694,13 +702,13 @@ int main (int argc, char **argv) {
 					}
 					/* Set destination square */
 					board[RANKS - (x->move[3] - '0')][x->move[2] - 'a'] = c;
-				} else { /* strlen(x->move) == 5, e.g. Qf5g4*/
+				} else { /* strlen(x->move) == 5, e.g. Qf5g4 */
 					/* Set origin square */
 					board[RANKS - (x->move[2] - '0')][x->move[1] - 'a'] = '1';
 					/* Set destination square */
 					board[RANKS - (x->move[4] - '0')][x->move[3] - 'a'] = c;
 				}
-				enpassant = 0; /* Piece move cancels enpassant opportunity*/
+				enpassant = 0; /* Piece move cancels enpassant opportunity */
 				break;
 			case 'K': /* King move */
 				/* No need to disambiguate! There's never more than 1 king per-side. Halleluja! */
@@ -751,7 +759,7 @@ int main (int argc, char **argv) {
 				else
 					castling &= ~(CASTLEk | CASTLEq);
 				break;
-				enpassant = 0; /* Piece move cancels enpassant opportunity*/
+				enpassant = 0; /* Piece move cancels enpassant opportunity */
 			case 'O': /* Castling */
 				if (strlen(x->move) == 3) /* O-O */
 					if (turn) { /* I could do smth crazy to save the if, like board[7*(1-turn)][]. But 1 "if" is faster than 4 multiplications, is it? */
@@ -783,7 +791,7 @@ int main (int argc, char **argv) {
 				else
 					castling &= ~(CASTLEk | CASTLEq);
 				break;
-				enpassant = 0; /* Piece move cancels enpassant opportunity*/
+				enpassant = 0; /* Piece move cancels enpassant opportunity */
 		}
 		x = x->next;
 		turn = (turn)?BLACK:WHITE; /* Toggle turn */
