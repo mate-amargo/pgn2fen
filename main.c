@@ -228,17 +228,27 @@ int main (int argc, char **argv) {
 		switch (x->move[0]) {
 			case 'a':	case 'b':	case 'c':	case 'd':	case 'e':	case 'f':	case 'g':	case 'h': /* Pawn move */
 				if (strstr(x->move,"=")) { /* Pawn promotion */
-					/* Set origin square */
-					if (turn) /* White */
-						board[1][x->move[0] - 'a'] = '1';
-					else /* Black */
-						board[RANKS-2][x->move[0] - 'a'] = '1';
-					/* Set destination square */
 					for (i = 0; x->move[i] != '='; i++); /* i is now the position of "=" */
-					if (turn) /* White */
+					if (turn) { /* White */
+						/* Set origin square */
+						board[1][x->move[0] - 'a'] = '1';
+						/* Set destination square */
 						board[0][x->move[i-2] - 'a'] = x->move[i+1];
-					else /* Black */
+						/* If the promotion occurs with a rook capture on the corner, the other color lose castling on that side */
+						if ('a' == x->move[i-2])
+							castling &= ~CASTLEq; /* Black Queenside */
+						else if ('h' == x->move[i-2])
+							castling &= ~CASTLEk; /* Black Kingside */
+					} else { /* Black */
+						/* Set origin square */
+						board[RANKS-2][x->move[0] - 'a'] = '1';
+						/* Set destination square */
 						board[RANKS-1][x->move[i-2] - 'a'] = tolower(x->move[i+1]); /* Promotions are uppercase */
+						if ('a' == x->move[i-2]) /* Check for rook capture */
+							castling &= ~CASTLEQ; /* White Queenside */
+						else if ('h' == x->move[i-2])
+							castling &= ~CASTLEK; /* White Kingside */
+					}
 					enpassant = 0;
 				} else if (strlen(x->move) > 2) { /* Move with capture */
 					/* Set origin square */
