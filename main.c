@@ -306,7 +306,7 @@ int main (int argc, char **argv) {
                 if (board[i][x->move[1] - 'a'] == c) {
                   board[i][x->move[1] - 'a'] = '1';
                   rook[0] = x->move[1]; 
-                  sprintf(&rook[1],"%d", RANKS - i); 
+                  rook[1] = '0' + (RANKS - i); 
                   found = 1;
                   break;
                 } else if (board[i][x->move[1] - 'a'] != '1') /* We hit a piece */
@@ -315,7 +315,7 @@ int main (int argc, char **argv) {
                 if (board[i][x->move[1] - 'a'] == c) {
                   board[i][x->move[1] - 'a'] = '1';
                   rook[0] = x->move[1]; 
-                  sprintf(&rook[1],"%d", RANKS - i); 
+                  rook[1] = '0' + (RANKS - i); 
                   break;
                 } else if (board[i][x->move[1] - 'a'] != '1') /* We hit a piece */
                   break;
@@ -357,7 +357,7 @@ int main (int argc, char **argv) {
             if (board[i][x->move[1] - 'a'] == c) {
               board[i][x->move[1] - 'a'] = '1';
               rook[0] = x->move[1]; 
-              sprintf(&rook[1],"%d", RANKS - i); 
+              rook[1] = '0' + (RANKS - i); 
               found = 1;
               break;
             } else if (board[i][x->move[1] - 'a'] != '1') /* We hit a piece */
@@ -366,7 +366,7 @@ int main (int argc, char **argv) {
             if (board[i][x->move[1] - 'a'] == c) {
               board[i][x->move[1] - 'a'] = '1';
               rook[0] = x->move[1]; 
-              sprintf(&rook[1],"%d", RANKS - i); 
+              rook[1] = '0' + (RANKS - i); 
               found = 1;
               break;
             } else if (board[i][x->move[1] - 'a'] != '1') /* We hit a piece */
